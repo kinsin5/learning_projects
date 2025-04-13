@@ -30,3 +30,18 @@ FROM prods pr
 JOIN product_category_name_translation pt
     ON pt.product_category_name = pr.product_category_name
 WHERE pr.rn <= 3;
+
+
+--Fiding best reviewed products
+SELECT 
+	pr.product_id,
+	AVG(review_score) "Review Score",
+	COUNT(pr.product_id) Reviews,
+	RANK() OVER (PARTITION BY NULL ORDER BY AVG(review_score) DESC) as review_rank
+ FROM products pr
+JOIN order_items oi ON pr.product_id = oi.product_id
+JOIN orders ord ON ord.order_id = oi.order_id
+JOIN reviews rv ON ord.order_id = rv.order_id
+GROUP BY pr.product_id
+HAVING COUNT(pr.product_id) >= 50
+ORDER BY review_rank ASC;
