@@ -45,3 +45,16 @@ JOIN reviews rv ON ord.order_id = rv.order_id
 GROUP BY pr.product_id
 HAVING COUNT(pr.product_id) >= 50
 ORDER BY review_rank ASC;
+
+--Finding biggest spenders
+SELECT 
+	c.customer_id, 
+	ROUND(SUM(payment_value)) AS spend,
+	RANK () OVER (PARTITION BY NULL ORDER BY SUM(payment_value) DESC) as spend_rank
+	FROM orders o
+JOIN customers c 
+ ON c.customer_id = o.customer_id
+JOIN order_payments op
+ ON op.order_id = o.order_id
+GROUP BY c.customer_id
+
