@@ -17,17 +17,30 @@ CREATE TABLE logs(
 	create_at TIMESTAMP
 )
 
+ALTER TABLE countries
+ADD COLUMN created_at TIMESTAMP DEFAULT now(),
+ADD COLUMN updated_at TIMESTAMP DEFAULT now();
+
+UPDATE countries 
+SET population = 37950803 
+WHERE name = 'Poland';
+
+SELECT * FROM logs
+WHERE id = (SELECT MAX(id) FROM logs);
+
 CREATE OR REPLACE FUNCTION trig_procedure() RETURNS TRIGGER AS 
 $$
 BEGIN
 	INSERT INTO logs (operation, create_at)
-	VALUES (TG_OP, now());
+	VALUES (TG_OP || ' on ' || New.name, now());
 RETURN NEW;
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE TRIGGER trig_insertion_logs
-AFTER INSERT OR DELETE ON countries
+CREATE OR REPLACE TRIGGER trig_insertion_logs
+AFTER INSERT OR DELETE OR UPDATE ON countries
 FOR EACH ROW EXECUTE PROCEDURE trig_procedure();
 
-SELECT * FROM logs;
+UPDATE countries 
+SET population = 37950804
+WHERE name = 'Poland';
